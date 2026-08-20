@@ -1,4 +1,4 @@
-# Farkle scorekeeper — v1 product brief
+# Farkle scorekeeper — v1.1 product brief
 
 ## Spirit
 
@@ -20,7 +20,9 @@ V1 deliberately excludes accounts, a server, remote or live multiplayer, automat
 - Restore that state after a refresh or browser restart on the same device.
 - Provide a clear New Game action. Require confirmation when it would erase an active game.
 - Show separate collapsible `How to Play` and `Rules` sections.
+- Show an always-visible, clearly labeled `Table guide` control in the header. It opens a focused guide without moving the full guide above game setup.
 - Show the active house-rule choices in `Rules`. Let players change them before a game starts.
+- Use the hero tagline `Roll bold. Bank bigger. Farkle.`
 - Use an over-the-top visual style with strong contrast, large scores, dramatic turn and winner states, and restrained motion that does not block score entry.
 - Use the static GitHub Pages deployment in `~/Code/personal/howbigisit` as the deployment reference.
 
@@ -62,17 +64,21 @@ Do not include Toxic Twos, High Stakes/Greed, Welfare/exact finish, instant-win 
 6. Undo restores the complete state before the most recent score entry, including totals, current player, and final-round state.
 7. Refreshing or reopening the site on the same browser restores the active game exactly.
 8. New Game warns before replacing an active game and clears it only after confirmation.
-9. `How to Play` and `Rules` are separate, keyboard-operable collapsible sections.
-10. `How to Play` explains turn score entry, Farkles as zero, turn order, the selected winning-threshold trigger, and the final round.
-11. `Rules` shows the selected scoring and play variants with plain explanations.
-12. Rule selections persist locally and are fixed once play starts unless the operator starts a new game.
-13. When a player first reaches or exceeds the selected winning threshold, the interface marks the final round and identifies the score to beat.
-14. Each other player receives exactly one final score entry, following the existing turn order.
-15. A tied score does not take the lead. Only a strictly higher score updates the leader and score to beat.
-16. The game declares the highest-scoring player after the last eligible final turn and accepts no further scores.
-17. The core flow works at narrow phone width and desktop width using pointer and keyboard input.
-18. Text and controls meet WCAG AA contrast, visible-focus, and reduced-motion expectations.
-19. A production build deploys as static files through the GitHub Pages pattern used by `howbigisit` and loads at `farkle.rdyson.dev` without a server dependency.
+9. An always-visible, clearly labeled `Table guide` control appears in the header and opens a focused guide. The full guide does not move above game setup.
+10. `How to Play` and `Rules` remain separate, keyboard-operable collapsible sections.
+11. `How to Play` explains the six-dice turn loop: the first listed player starts; play follows entered order; each roll must set aside at least one scoring die or combination; the player may bank or reroll the remaining dice; a Farkle loses only that turn's unbanked points; and combinations cannot be built across rolls.
+12. `How to Play` explains the selected hot-dice and opening-score behavior, the selected winning-threshold trigger, and the strict-higher final-round process.
+13. `Rules` shows the active selected scoring and play variants with plain explanations and refreshes when pre-game rule selections change.
+14. Rule selections persist locally and are fixed once play starts unless the operator starts a new game.
+15. When a player first reaches or exceeds the selected winning threshold, the interface marks the final round and identifies the score to beat.
+16. Each other player receives exactly one final score entry, following the existing turn order.
+17. A tied score does not take the lead. Only a strictly higher score updates the leader and score to beat.
+18. The game declares the highest-scoring player after the last eligible final turn and accepts no further scores.
+19. The app remains a manual scorekeeper. It does not validate dice, add a first-player selector, or add a start randomizer.
+20. The hero tagline is exactly `Roll bold. Bank bigger. Farkle.`
+21. The core flow works at narrow phone width and desktop width using pointer and keyboard input.
+22. Text and controls meet WCAG AA contrast, visible-focus, and reduced-motion expectations.
+23. A production build deploys as static files through the GitHub Pages pattern used by `howbigisit` and loads at `farkle.rdyson.dev` without a server dependency.
 
 ## Confirmed v1 decisions
 
@@ -85,6 +91,10 @@ Confirmed by the operator on 20 August 2026:
 5. The `Common house rules` preset has no opening-score minimum. Players may bank any score from their first turn. The existing opening-score alternatives remain selectable.
 6. The `Common house rules` preset lets a player bank after scoring all six dice or roll all six again. A forced reroll remains selectable as the hot-dice alternative.
 7. The selected winning threshold controls when the final round begins. The default is 10,000; 5,000, 15,000, and 20,000 remain selectable reach-or-exceed triggers.
+8. The hero tagline is `Roll bold. Bank bigger. Farkle.`
+9. An always-visible header `Table guide` opens focused help while preserving separate keyboard-operable `How to Play` and `Rules` sections below setup.
+10. The guide explains the six-dice turn loop and uses the active selected rules for its scoring reference. The app still accepts manual turn scores and does not validate dice.
+11. The first listed player starts, and play follows entered order. V1 does not include a first-player selector or randomizer.
 
 ## Lean Tightbeam operating plan
 
