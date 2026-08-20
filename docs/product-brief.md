@@ -23,6 +23,7 @@ V1 deliberately excludes accounts, a server, remote or live multiplayer, automat
 - Do not show a `Table guide` control or focused guide modal/dialog. Keep all help in the separate below-setup `How to Play` and `Rules` sections.
 - Show the active house-rule choices in `Rules`. Let players change them before a game starts.
 - Use the hero tagline `Roll bold. Bank bigger. Farkle.`
+- Use the hero subtitle `A scorekeeper for Farkle, a six-dice game for 2–8 players.`
 - Use an over-the-top visual style with strong contrast, large scores, dramatic turn and winner states, and restrained motion that does not block score entry.
 - Use the static GitHub Pages deployment in `~/Code/personal/howbigisit` as the deployment reference.
 
@@ -79,6 +80,7 @@ Do not include Toxic Twos, High Stakes/Greed, Welfare/exact finish, instant-win 
 21. The core flow works at narrow phone width and desktop width using pointer and keyboard input.
 22. Text and controls meet WCAG AA contrast, visible-focus, and reduced-motion expectations.
 23. A production build deploys as static files through the GitHub Pages pattern used by `howbigisit` and loads at `farkle.rdyson.dev` without a server dependency.
+24. The hero subtitle is exactly `A scorekeeper for Farkle, a six-dice game for 2–8 players.`
 
 ## Confirmed v1 decisions
 
@@ -95,6 +97,7 @@ Confirmed by the operator on 20 August 2026:
 9. The released header `Table guide` control and its focused modal/dialog are removed completely, not hidden. The released implementation at commit `5b084673581120fa48a24df6e241373f075a5434` is superseded only for this header/dialog slice.
 10. The separate below-setup `How to Play` and `Rules` sections remain keyboard-operable. They retain the expanded six-dice turn loop and active selected-rules scoring reference. The app still accepts manual turn scores and does not validate dice.
 11. The first listed player starts, and play follows entered order. V1 does not include a first-player selector or randomizer.
+12. The hero subtitle is `A scorekeeper for Farkle, a six-dice game for 2–8 players.`
 
 ## Lean Tightbeam operating plan
 
