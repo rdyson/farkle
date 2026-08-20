@@ -10,10 +10,7 @@
   <body>
     <header class="site-header">
       <a class="logo" href="#main">FARKLE<span>!</span></a>
-      <div class="header-actions">
-        <button id="table-guide" class="guide-button" type="button">Table guide</button>
-        <button id="new-game" class="text-button" type="button" hidden>New game</button>
-      </div>
+      <button id="new-game" class="text-button" type="button" hidden>New game</button>
     </header>
 
     <main id="main" tabindex="-1">
@@ -21,7 +18,7 @@
         <div class="hero-copy">
           <p class="eyebrow">Dice out. Volume up.</p>
           <h1 id="setup-title">Roll bold. <em>Bank bigger.</em> Farkle.</h1>
-          <p>Keep the dice and table talk. We’ll keep the score.</p>
+          <p>A scorekeeper for Farkle, a six-dice game for 2–8 players.</p>
         </div>
 
         <form id="setup-form" class="setup-card" novalidate>
@@ -91,42 +88,6 @@
         </details>
       </aside>
     </main>
-
-    <dialog id="table-guide-dialog" aria-labelledby="table-guide-title">
-      <div class="guide-heading">
-        <div>
-          <p class="step">Keep it moving</p>
-          <h2 id="table-guide-title">Table guide</h2>
-        </div>
-        <button class="guide-close" type="button" aria-label="Close guide" autofocus>×</button>
-      </div>
-      <div class="guide-grid">
-        <section>
-          <h3>Take a turn</h3>
-          <ol>
-            <li>Start every turn with six dice.</li>
-            <li>Roll and set aside at least one scoring die or combination.</li>
-            <li>Bank the turn’s points or reroll the remaining dice.</li>
-          </ol>
-          <p>A Farkle loses only that turn’s unbanked points. Build each combination within one roll, not across rolls.</p>
-        </section>
-        <section>
-          <h3>This table</h3>
-          <p id="guide-hot-dice"></p>
-          <p id="guide-opening-score"></p>
-          <p id="guide-winning-score"></p>
-        </section>
-        <section class="guide-rules">
-          <h3>Scoring reference</h3>
-          <div id="guide-selected-rules" class="rules-list"></div>
-        </section>
-        <section>
-          <h3>Finish the game</h3>
-          <p>The first player to reach the selected winning score starts the final round. Every other player gets one last turn in the entered order. Only a strictly higher total takes the lead; a tie does not.</p>
-          <p class="muted">Enter the banked score agreed at the table. This scorekeeper does not check the dice.</p>
-        </section>
-      </div>
-    </dialog>
 
     <dialog id="new-game-dialog">
       <form method="dialog">

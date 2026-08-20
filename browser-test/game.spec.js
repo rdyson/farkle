@@ -112,29 +112,27 @@ test("defaults to no opening minimum while retaining 500 as an option", async ({
   await expect(page.locator("#selected-rules")).toContainText("15,000");
 });
 
-test("shows the table guide and explains the selected turn rules", async ({ page }) => {
+test("removes the table guide and keeps selected guidance below setup", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Roll bold. Bank bigger. Farkle." })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Table guide" })).toBeVisible();
+  await expect(page.getByText("A scorekeeper for Farkle, a six-dice game for 2–8 players.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Table guide" })).toHaveCount(0);
+  await expect(page.locator("#table-guide-dialog")).toHaveCount(0);
 
   await page.getByText("Adjust rules", { exact: true }).click();
   await page.getByLabel("Opening score").selectOption("500");
   await page.getByLabel("Hot dice").selectOption("must-roll");
   await page.getByLabel("Winning score").selectOption("15000");
-  await page.getByRole("button", { name: "Table guide" }).click();
+  await page.getByText("How to Play", { exact: true }).click();
+  const howToPlay = page.locator("#how-to-play");
+  await expect(howToPlay).toContainText("Start every turn with six dice");
+  await expect(howToPlay).toContainText("must roll all six");
+  await expect(howToPlay).toContainText("players need 500 before their first bank");
+  await expect(howToPlay).toContainText("15,000 points");
 
-  const guide = page.getByRole("dialog", { name: "Table guide" });
-  await expect(guide).toBeVisible();
-  await expect(guide).toContainText("Start every turn with six dice");
-  await expect(guide).toContainText("must roll all six");
-  await expect(guide).toContainText("500 before the first bank");
-  await expect(guide).toContainText("15,000");
-  await expect(guide).toContainText("does not check the dice");
-  await expect(page.getByText("How to Play", { exact: true })).toBeVisible();
-
-  await page.getByRole("button", { name: "Close guide" }).click();
-  await expect(guide).toBeHidden();
-  await expect(page.getByRole("button", { name: "Table guide" })).toBeFocused();
+  await page.getByText("Rules", { exact: true }).click();
+  await expect(page.locator("#selected-rules")).toContainText("15,000");
+  await expect(page.locator("#selected-rules")).toContainText("must roll all six");
 });
 
 for (const viewport of [{ name: "phone", width: 360, height: 740 }, { name: "desktop", width: 1280, height: 900 }]) {
