@@ -62,9 +62,10 @@ test("runs one final turn per challenger and keeps the leader on a tie", async (
 test("persists collapsible state and confirms before clearing a game", async ({ page }) => {
   await startGame(page);
   await page.getByText("How to Play", { exact: true }).click();
-  await expect(page.getByText("Roll the physical dice")).toBeVisible();
+  const howToPlay = page.locator("#how-to-play");
+  await expect(howToPlay.getByText("Start every turn with six dice", { exact: false })).toBeVisible();
   await page.reload();
-  await expect(page.getByText("Roll the physical dice")).toBeVisible();
+  await expect(howToPlay.getByText("Start every turn with six dice", { exact: false })).toBeVisible();
 
   await page.getByRole("button", { name: "New game" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
@@ -72,7 +73,7 @@ test("persists collapsible state and confirms before clearing a game", async ({ 
   await expect(page.getByRole("heading", { name: /Ada.*turn/ })).toBeVisible();
   await page.getByRole("button", { name: "New game" }).click();
   await page.getByRole("button", { name: "Clear game" }).click();
-  await expect(page.getByRole("heading", { name: /Who’s ready/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Roll bold. Bank bigger. Farkle." })).toBeVisible();
 });
 
 test("supports the core flow with keyboard input", async ({ page }) => {
@@ -88,7 +89,7 @@ test("supports the core flow with keyboard input", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /Lin.*turn/ })).toBeVisible();
   await page.getByText("Rules", { exact: true }).focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByText("Common house rules")).toBeVisible();
+  await expect(page.locator("#selected-rules").getByText("Common house rules")).toBeVisible();
 });
 
 test("defaults to no opening minimum while retaining 500 as an option", async ({ page }) => {
@@ -109,6 +110,31 @@ test("defaults to no opening minimum while retaining 500 as an option", async ({
   await expect(page.locator("#how-to-threshold")).toHaveText("15,000 points");
   await page.getByText("Rules", { exact: true }).click();
   await expect(page.locator("#selected-rules")).toContainText("15,000");
+});
+
+test("shows the table guide and explains the selected turn rules", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Roll bold. Bank bigger. Farkle." })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Table guide" })).toBeVisible();
+
+  await page.getByText("Adjust rules", { exact: true }).click();
+  await page.getByLabel("Opening score").selectOption("500");
+  await page.getByLabel("Hot dice").selectOption("must-roll");
+  await page.getByLabel("Winning score").selectOption("15000");
+  await page.getByRole("button", { name: "Table guide" }).click();
+
+  const guide = page.getByRole("dialog", { name: "Table guide" });
+  await expect(guide).toBeVisible();
+  await expect(guide).toContainText("Start every turn with six dice");
+  await expect(guide).toContainText("must roll all six");
+  await expect(guide).toContainText("500 before the first bank");
+  await expect(guide).toContainText("15,000");
+  await expect(guide).toContainText("does not check the dice");
+  await expect(page.getByText("How to Play", { exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "Close guide" }).click();
+  await expect(guide).toBeHidden();
+  await expect(page.getByRole("button", { name: "Table guide" })).toBeFocused();
 });
 
 for (const viewport of [{ name: "phone", width: 360, height: 740 }, { name: "desktop", width: 1280, height: 900 }]) {

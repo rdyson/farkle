@@ -93,10 +93,22 @@ function ruleText(key, value) {
   return options[key].find(([candidate]) => String(candidate) === String(value))?.[1] ?? String(value);
 }
 
+function rulesMarkup(rules, includeNote = true) {
+  return `<p class="preset-name">Common house rules</p><dl>${Object.entries(rules).map(([key, value]) => `<div><dt>${labels[key]}</dt><dd>${ruleText(key, value)}</dd></div>`).join("")}</dl>${includeNote ? '<p class="muted">These choices are informational. Enter the score agreed at the table.</p>' : ""}`;
+}
+
 function renderSelectedRules() {
   const rules = game?.rules ?? readRules();
   elements["how-to-threshold"].textContent = `${rules.winningScore.toLocaleString()} points`;
-  elements["selected-rules"].innerHTML = `<p class="preset-name">Common house rules</p><dl>${Object.entries(rules).map(([key, value]) => `<div><dt>${labels[key]}</dt><dd>${ruleText(key, value)}</dd></div>`).join("")}</dl><p class="muted">These choices are informational. Enter the score agreed at the table.</p>`;
+  elements["how-to-hot-dice"].textContent = ruleText("hotDice", rules.hotDice).replace(/^Hot dice: /, "");
+  elements["how-to-opening-score"].textContent = rules.openingScore === 0
+    ? "players may bank any first-turn score."
+    : `players need ${rules.openingScore.toLocaleString()} before their first bank.`;
+  elements["selected-rules"].innerHTML = rulesMarkup(rules);
+  elements["guide-hot-dice"].textContent = ruleText("hotDice", rules.hotDice);
+  elements["guide-opening-score"].textContent = `Opening score: ${ruleText("openingScore", rules.openingScore)}`;
+  elements["guide-winning-score"].textContent = `Final round: reach or exceed ${rules.winningScore.toLocaleString()} points.`;
+  elements["guide-selected-rules"].innerHTML = rulesMarkup(rules, false);
 }
 
 function renderGame() {
@@ -172,6 +184,8 @@ elements["score-form"].addEventListener("submit", (event) => {
   if (game.phase !== "finished") elements["turn-score"].focus();
 });
 elements.undo.addEventListener("click", () => { game = undoScore(game); saveGame(); renderGame(); elements["turn-score"].focus(); });
+elements["table-guide"].addEventListener("click", () => elements["table-guide-dialog"].showModal());
+elements["table-guide-dialog"].querySelector(".guide-close").addEventListener("click", () => elements["table-guide-dialog"].close());
 elements["new-game"].addEventListener("click", () => elements["new-game-dialog"].showModal());
 elements["confirm-new-game"].addEventListener("click", () => { game = null; storageError = null; saveGame(); setupNames = ["", ""]; renderPlayerFields(); renderGame(); });
 for (const [id, key] of [["how-to-play", "howToPlay"], ["rules-summary", "rules"]]) {

@@ -10,14 +10,17 @@
   <body>
     <header class="site-header">
       <a class="logo" href="#main">FARKLE<span>!</span></a>
-      <button id="new-game" class="text-button" type="button" hidden>New game</button>
+      <div class="header-actions">
+        <button id="table-guide" class="guide-button" type="button">Table guide</button>
+        <button id="new-game" class="text-button" type="button" hidden>New game</button>
+      </div>
     </header>
 
     <main id="main" tabindex="-1">
       <section id="setup-screen" class="screen setup-screen" aria-labelledby="setup-title">
         <div class="hero-copy">
           <p class="eyebrow">Dice out. Volume up.</p>
-          <h1 id="setup-title">Who’s ready to <em>risk it?</em></h1>
+          <h1 id="setup-title">Roll bold. <em>Bank bigger.</em> Farkle.</h1>
           <p>Keep the dice and table talk. We’ll keep the score.</p>
         </div>
 
@@ -75,8 +78,11 @@
         <details id="how-to-play">
           <summary>How to Play</summary>
           <div class="details-body">
-            <p>Roll the physical dice and enter the points banked for that turn. Enter zero when a player Farkles. The app follows the shown turn order and adds each score to the running total.</p>
-            <p>The first player to reach the selected winning threshold (<span id="how-to-threshold">10,000 points</span> for this game) starts the final round. Every other player gets one last turn. A challenger must beat the score to take the lead; a tie is not enough.</p>
+            <p>The first listed player starts. Play follows the entered order. Start every turn with six dice. After each roll, set aside at least one scoring die or combination. Then bank the turn’s points or reroll the remaining dice.</p>
+            <p>A Farkle ends the turn and loses only its unbanked points. Combinations must come from one roll; they cannot be built across rolls.</p>
+            <p><strong>Hot dice:</strong> <span id="how-to-hot-dice"></span> <strong>Opening score:</strong> <span id="how-to-opening-score"></span></p>
+            <p>The first player to reach the selected winning threshold (<span id="how-to-threshold">10,000 points</span>) starts the final round. Every other player gets one last turn in the existing order. A challenger must finish strictly higher than the current score to beat; a tie leaves the existing leader in front.</p>
+            <p>Enter each banked turn score yourself. The scorekeeper adds it to the player’s total but does not check the dice.</p>
           </div>
         </details>
         <details id="rules-summary">
@@ -85,6 +91,42 @@
         </details>
       </aside>
     </main>
+
+    <dialog id="table-guide-dialog" aria-labelledby="table-guide-title">
+      <div class="guide-heading">
+        <div>
+          <p class="step">Keep it moving</p>
+          <h2 id="table-guide-title">Table guide</h2>
+        </div>
+        <button class="guide-close" type="button" aria-label="Close guide" autofocus>×</button>
+      </div>
+      <div class="guide-grid">
+        <section>
+          <h3>Take a turn</h3>
+          <ol>
+            <li>Start every turn with six dice.</li>
+            <li>Roll and set aside at least one scoring die or combination.</li>
+            <li>Bank the turn’s points or reroll the remaining dice.</li>
+          </ol>
+          <p>A Farkle loses only that turn’s unbanked points. Build each combination within one roll, not across rolls.</p>
+        </section>
+        <section>
+          <h3>This table</h3>
+          <p id="guide-hot-dice"></p>
+          <p id="guide-opening-score"></p>
+          <p id="guide-winning-score"></p>
+        </section>
+        <section class="guide-rules">
+          <h3>Scoring reference</h3>
+          <div id="guide-selected-rules" class="rules-list"></div>
+        </section>
+        <section>
+          <h3>Finish the game</h3>
+          <p>The first player to reach the selected winning score starts the final round. Every other player gets one last turn in the entered order. Only a strictly higher total takes the lead; a tie does not.</p>
+          <p class="muted">Enter the banked score agreed at the table. This scorekeeper does not check the dice.</p>
+        </section>
+      </div>
+    </dialog>
 
     <dialog id="new-game-dialog">
       <form method="dialog">
