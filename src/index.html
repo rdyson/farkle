@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#54178f" />
+    <title>Farkle! Scorekeeper</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="logo" href="#main">FARKLE<span>!</span></a>
+      <button id="new-game" class="text-button" type="button" hidden>New game</button>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section id="setup-screen" class="screen setup-screen" aria-labelledby="setup-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Dice out. Volume up.</p>
+          <h1 id="setup-title">Who’s ready to <em>risk it?</em></h1>
+          <p>Keep the dice and table talk. We’ll keep the score.</p>
+        </div>
+
+        <form id="setup-form" class="setup-card" novalidate>
+          <div class="section-heading">
+            <div>
+              <p class="step">Step 1</p>
+              <h2>Build the table</h2>
+            </div>
+            <span id="player-count" class="count">2 / 8</span>
+          </div>
+          <div id="player-fields" class="player-fields"></div>
+          <button id="add-player" class="secondary-button" type="button">+ Add player</button>
+          <p id="storage-error" class="error" role="alert"></p>
+          <p id="setup-error" class="error" role="alert"></p>
+
+          <div class="section-heading rule-heading">
+            <div>
+              <p class="step">Step 2</p>
+              <h2>Pick the house rules</h2>
+            </div>
+          </div>
+          <p class="muted">Start with the common preset, then adjust only what your table uses.</p>
+          <details id="adjust-rules" class="rules-editor">
+            <summary>Adjust rules</summary>
+            <div id="rule-fields" class="rule-fields"></div>
+          </details>
+
+          <button class="primary-button" type="submit">Start the game <span aria-hidden="true">→</span></button>
+        </form>
+      </section>
+
+      <section id="game-screen" class="screen game-screen" aria-live="polite" hidden>
+        <div id="game-banner" class="game-banner">
+          <p id="phase-label" class="eyebrow"></p>
+          <h1 id="turn-heading"></h1>
+          <p id="score-to-beat" class="score-to-beat"></p>
+        </div>
+
+        <ol id="scoreboard" class="scoreboard" aria-label="Scoreboard"></ol>
+
+        <form id="score-form" class="score-entry" novalidate>
+          <label for="turn-score">Points this turn</label>
+          <div class="score-controls">
+            <input id="turn-score" name="turn-score" inputmode="numeric" autocomplete="off" placeholder="0" />
+            <button class="primary-button" type="submit">Bank it!</button>
+          </div>
+          <p class="hint">Farkled? Enter 0. We don’t judge.</p>
+          <p id="score-error" class="error" role="alert"></p>
+          <button id="undo" class="secondary-button undo-button" type="button">Undo last score</button>
+        </form>
+      </section>
+
+      <aside class="learn">
+        <details id="how-to-play">
+          <summary>How to Play</summary>
+          <div class="details-body">
+            <p>Roll the physical dice and enter the points banked for that turn. Enter zero when a player Farkles. The app follows the shown turn order and adds each score to the running total.</p>
+            <p>The first player to reach the winning score—10,000 points by default—starts the final round. Every other player gets one last turn. A challenger must beat the score to take the lead; a tie is not enough.</p>
+          </div>
+        </details>
+        <details id="rules-summary">
+          <summary>Rules</summary>
+          <div id="selected-rules" class="details-body rules-list"></div>
+        </details>
+      </aside>
+    </main>
+
+    <dialog id="new-game-dialog">
+      <form method="dialog">
+        <p class="step">Heads up</p>
+        <h2>Start a new game?</h2>
+        <p>This clears the active game and its scores on this device.</p>
+        <div class="dialog-actions">
+          <button value="cancel" class="secondary-button">Keep playing</button>
+          <button id="confirm-new-game" value="confirm" class="danger-button">Clear game</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "farkle-scorekeeper",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.1"
+  }
+}
