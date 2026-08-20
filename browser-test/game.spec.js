@@ -104,6 +104,11 @@ test("defaults to no opening minimum while retaining 500 as an option", async ({
     "600 before the first bank",
     "1,000 before the first bank",
   ]);
+
+  await page.getByLabel("Winning score").selectOption("15000");
+  await expect(page.locator("#how-to-threshold")).toHaveText("15,000 points");
+  await page.getByText("Rules", { exact: true }).click();
+  await expect(page.locator("#selected-rules")).toContainText("15,000");
 });
 
 for (const viewport of [{ name: "phone", width: 360, height: 740 }, { name: "desktop", width: 1280, height: 900 }]) {

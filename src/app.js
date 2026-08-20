@@ -95,6 +95,7 @@ function ruleText(key, value) {
 
 function renderSelectedRules() {
   const rules = game?.rules ?? readRules();
+  elements["how-to-threshold"].textContent = `${rules.winningScore.toLocaleString()} points`;
   elements["selected-rules"].innerHTML = `<p class="preset-name">Common house rules</p><dl>${Object.entries(rules).map(([key, value]) => `<div><dt>${labels[key]}</dt><dd>${ruleText(key, value)}</dd></div>`).join("")}</dl><p class="muted">These choices are informational. Enter the score agreed at the table.</p>`;
 }
 
@@ -148,6 +149,7 @@ function escapeHtml(value) {
 }
 
 elements["add-player"].addEventListener("click", () => { if (setupNames.length < 8) { setupNames.push(""); renderPlayerFields(); } });
+elements["rule-fields"].addEventListener("change", renderSelectedRules);
 elements["setup-form"].addEventListener("submit", (event) => {
   event.preventDefault();
   const error = validateNames(setupNames);
