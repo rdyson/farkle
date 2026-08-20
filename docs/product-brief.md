@@ -26,13 +26,13 @@ V1 deliberately excludes accounts, a server, remote or live multiplayer, automat
 
 ## Game end
 
-The winning threshold defaults to 10,000. A player who first reaches or exceeds it becomes the leader and starts the final round. Record that player's total as the score to beat.
+The winning threshold defaults to 10,000. If players select 5,000, 15,000, or 20,000, that selected threshold replaces the default. A player who first reaches or exceeds the selected threshold becomes the leader and starts the final round. Record that player's total as the score to beat.
 
 Every other player gets exactly one final turn. The triggering player does not get another turn. A challenger takes the lead only by exceeding the current score to beat. If a challenger does so, update the score to beat, but do not grant new turns or restart the final round. After all eligible players finish their final turn, the player with the highest score wins. A tie does not displace the existing leader.
 
 ## Recommended rule choices
 
-The app does not enforce these rules against manual scores. It records the table's choices and explains them.
+The app does not validate manually entered scores against scoring-combination or opening-score choices. It records those choices and explains them. The selected winning threshold does control when the final round begins.
 
 | Rule | Recommended default | Selectable alternatives |
 | --- | --- | --- |
@@ -63,10 +63,10 @@ Do not include Toxic Twos, High Stakes/Greed, Welfare/exact finish, instant-win 
 7. Refreshing or reopening the site on the same browser restores the active game exactly.
 8. New Game warns before replacing an active game and clears it only after confirmation.
 9. `How to Play` and `Rules` are separate, keyboard-operable collapsible sections.
-10. `How to Play` explains turn score entry, Farkles as zero, turn order, the 10,000-point trigger, and the final round.
+10. `How to Play` explains turn score entry, Farkles as zero, turn order, the selected winning-threshold trigger, and the final round.
 11. `Rules` shows the selected scoring and play variants with plain explanations.
 12. Rule selections persist locally and are fixed once play starts unless the operator starts a new game.
-13. When a player first reaches at least 10,000, the interface marks the final round and identifies the score to beat.
+13. When a player first reaches or exceeds the selected winning threshold, the interface marks the final round and identifies the score to beat.
 14. Each other player receives exactly one final score entry, following the existing turn order.
 15. A tied score does not take the lead. Only a strictly higher score updates the leader and score to beat.
 16. The game declares the highest-scoring player after the last eligible final turn and accepts no further scores.
@@ -84,6 +84,7 @@ Confirmed by the operator on 20 August 2026:
 4. Rule selections remain informational. The app does not validate manually entered scores against them.
 5. The `Common house rules` preset has no opening-score minimum. Players may bank any score from their first turn. The existing opening-score alternatives remain selectable.
 6. The `Common house rules` preset lets a player bank after scoring all six dice or roll all six again. A forced reroll remains selectable as the hot-dice alternative.
+7. The selected winning threshold controls when the final round begins. The default is 10,000; 5,000, 15,000, and 20,000 remain selectable reach-or-exceed triggers.
 
 ## Lean Tightbeam operating plan
 
