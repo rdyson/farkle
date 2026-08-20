@@ -37,7 +37,7 @@ The app does not enforce these rules against manual scores. It records the table
 | Rule | Recommended default | Selectable alternatives |
 | --- | --- | --- |
 | Winning score | 10,000; reach or exceed | 5,000; 15,000; 20,000 |
-| Opening score | 500 points before a player's first bank | None; 350; 400; 600; 1,000 |
+| Opening score | None; players may bank any first-turn score | 350; 400; 500; 600; 1,000 |
 | Single 1 / single 5 | 100 / 50 | No single 5 |
 | Three of a kind | Three 1s = 1,000; other triples = face value × 100 | Three 1s = 300 |
 | Four, five, or six of a kind | 1,000 / 2,000 / 3,000 | Multipliers based on the triple score |
@@ -82,6 +82,8 @@ Confirmed by the operator on 20 August 2026:
 2. The app provides one `Common house rules` preset and an `Adjust rules` panel limited to the options above. It does not provide a free-form rules editor.
 3. A game supports 2–8 players.
 4. Rule selections remain informational. The app does not validate manually entered scores against them.
+5. The `Common house rules` preset has no opening-score minimum. Players may bank any score from their first turn. The existing opening-score alternatives remain selectable.
+6. The `Common house rules` preset lets a player bank after scoring all six dice or roll all six again. A forced reroll remains selectable as the hot-dice alternative.
 
 ## Lean Tightbeam operating plan
 
