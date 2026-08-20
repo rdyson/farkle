@@ -5,7 +5,7 @@ const options = {
   winningScore: [
     [10000, "10,000 — reach or exceed"], [5000, "5,000"], [15000, "15,000"], [20000, "20,000"],
   ],
-  openingScore: [[500, "500 before the first bank"], [0, "No opening minimum"], [350, "350 before the first bank"], [400, "400 before the first bank"], [600, "600 before the first bank"], [1000, "1,000 before the first bank"]],
+  openingScore: [[0, "No opening minimum"], [350, "350 before the first bank"], [400, "400 before the first bank"], [500, "500 before the first bank"], [600, "600 before the first bank"], [1000, "1,000 before the first bank"]],
   singleFive: [[true, "Single 1 = 100; single 5 = 50"], [false, "No single 5"]],
   tripleOnes: [[1000, "Three 1s = 1,000"], [300, "Three 1s = 300"]],
   extendedKinds: [["fixed", "Four / five / six = 1,000 / 2,000 / 3,000"], ["multipliers", "Multiply the triple score"]],

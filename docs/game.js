@@ -1,6 +1,6 @@
 export const defaultRules = Object.freeze({
   winningScore: 10000,
-  openingScore: 500,
+  openingScore: 0,
   singleFive: true,
   tripleOnes: 1000,
   extendedKinds: "fixed",

@@ -18,7 +18,9 @@ test("accepts only non-negative whole-number turn scores", () => {
 });
 
 test("records zero as a completed turn and advances", () => {
-  const state = recordScore(createGame(["Ada", "Lin"]), 0);
+  const game = createGame(["Ada", "Lin"]);
+  assert.equal(game.rules.openingScore, 0);
+  const state = recordScore(game, 0);
   assert.equal(state.schemaVersion, 1);
   assert.deepEqual(state.players.map((player) => player.total), [0, 0]);
   assert.equal(state.currentIndex, 1);

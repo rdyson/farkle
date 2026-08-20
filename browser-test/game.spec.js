@@ -91,6 +91,21 @@ test("supports the core flow with keyboard input", async ({ page }) => {
   await expect(page.getByText("Common house rules")).toBeVisible();
 });
 
+test("defaults to no opening minimum while retaining 500 as an option", async ({ page }) => {
+  await page.goto("/");
+  await page.getByText("Adjust rules", { exact: true }).click();
+  const openingScore = page.getByLabel("Opening score");
+  await expect(openingScore).toHaveValue("0");
+  await expect(openingScore.locator("option")).toHaveText([
+    "No opening minimum",
+    "350 before the first bank",
+    "400 before the first bank",
+    "500 before the first bank",
+    "600 before the first bank",
+    "1,000 before the first bank",
+  ]);
+});
+
 for (const viewport of [{ name: "phone", width: 360, height: 740 }, { name: "desktop", width: 1280, height: 900 }]) {
   test(`core flow fits ${viewport.name} width`, async ({ page }) => {
     await page.setViewportSize(viewport);
