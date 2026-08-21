@@ -1,22 +1,23 @@
-# Farkle scorekeeper — v1.2 product brief
+# Farkle scorekeeper — v1.3 product brief
 
 ## Spirit
 
 Make an in-person Farkle game easier to run without replacing the dice, table talk, or house rules. The scorekeeper must stay simple enough that one shared device can replace pencil and paper. It should feel loud, playful, and celebratory rather than like an accounting tool.
 
-Success means players can start a game quickly, enter each turn's score, see the score to beat, and finish the final round without doing arithmetic or debating the configured rules.
+Success means players can start a game quickly, enter the points from each scoring throw, see the unbanked turn subtotal and score to beat, and finish the final round without doing arithmetic or debating the configured rules.
 
-V1 deliberately excludes accounts, a server, remote or live multiplayer, automated dice scoring, roll entry, player statistics, and game history across multiple named games.
+V1 deliberately excludes accounts, a server, remote or live multiplayer, automated dice scoring, dice or roll-result entry, player statistics, and game history across multiple named games.
 
 ## Product brief
 
 - Ship a static web app at `farkle.rdyson.dev`.
 - Ask for player names when a game starts. Require at least two players.
 - Keep players in a visible turn order and maintain a running total for each player.
-- Let the operator enter a non-negative score for the current turn. Add it to that player's running total.
-- Treat a Farkle as a turn score of zero. Do not model dice or validate how the score was earned.
-- Let the operator correct the most recent score entry through an undo action.
-- Persist the active game, player order, totals, current player, final-round state, selected rules, and collapsed-section state in browser-local storage.
+- Let the operator manually enter the positive whole-number points from each scoring throw. Keep an ordered ledger and derive the active unbanked subtotal from those entries.
+- Provide explicit `Bank` and `Farkle` actions. `Bank` adds the unbanked subtotal once to the current player's running total. `Farkle` discards the complete unbanked subtotal and records a zero turn. Either action advances the turn.
+- Do not model dice, enter dice results, identify combinations, or validate how any throw score was earned.
+- Before Bank or Farkle, let the operator remove the newest ledger entry with `Undo last throw`. After Bank or Farkle, let `Undo last turn` restore the complete state before that action; undoing a Farkle restores its discarded ledger.
+- Persist the active game, player order, totals, current player, pending throw ledger, final-round state, selected rules, and collapsed-section state in browser-local storage.
 - Restore that state after a refresh or browser restart on the same device.
 - Provide a clear New Game action. Require confirmation when it would erase an active game.
 - Show separate collapsible `How to Play` and `Rules` sections.
@@ -43,7 +44,7 @@ The app does not validate manually entered scores against scoring-combination or
 | Opening score | None; players may bank any first-turn score | 350; 400; 500; 600; 1,000 |
 | Single 1 / single 5 | 100 / 50 | No single 5 |
 | Three of a kind | Three 1s = 1,000; other triples = face value × 100 | Three 1s = 300 |
-| Four, five, or six of a kind | 1,000 / 2,000 / 3,000 | Multipliers based on the triple score |
+| Four, five, or six of a kind | 1,000 / 2,000 / 3,000 | Face-based doubling: 2× / 4× / 8× the corresponding triple score |
 | Straight, 1–6 | 1,500 | 1,200; 2,000; 2,500; 3,000; no special score |
 | Three pairs | 1,500 | 500; 600; 750; 1,000; no special score |
 | Four of a kind plus a pair | 1,500 | Score only the four of a kind |
@@ -59,30 +60,32 @@ Do not include Toxic Twos, High Stakes/Greed, Welfare/exact finish, instant-win 
 
 1. A new visitor can enter at least two non-empty, distinct player names and start a game.
 2. The game screen always identifies the current player and shows every player's running total.
-3. Entering a valid non-negative integer adds that value once to the current player's total and advances the turn.
-4. Empty, negative, decimal, and non-numeric entries do not change game state and produce a clear inline message.
-5. Entering zero records a completed turn, leaves the total unchanged, and advances the turn.
-6. Undo restores the complete state before the most recent score entry, including totals, current player, and final-round state.
-7. Refreshing or reopening the site on the same browser restores the active game exactly.
-8. New Game warns before replacing an active game and clears it only after confirmation.
-9. The released header `Table guide` control and its focused modal/dialog do not exist in the interface or application behavior. They are removed, not hidden.
-10. `How to Play` and `Rules` remain separate, keyboard-operable collapsible sections.
-11. `How to Play` explains the six-dice turn loop: the first listed player starts; play follows entered order; each roll must set aside at least one scoring die or combination; the player may bank or reroll the remaining dice; a Farkle loses only that turn's unbanked points; and combinations cannot be built across rolls.
-12. `How to Play` explains the selected hot-dice and opening-score behavior, the selected winning-threshold trigger, and the strict-higher final-round process.
-13. `Rules` shows the active selected scoring and play variants with plain explanations and refreshes when pre-game rule selections change.
-14. Rule selections persist locally and are fixed once play starts unless the operator starts a new game.
-15. When a player first reaches or exceeds the selected winning threshold, the interface marks the final round and identifies the score to beat.
-16. Each other player receives exactly one final score entry, following the existing turn order.
-17. A tied score does not take the lead. Only a strictly higher score updates the leader and score to beat.
-18. The game declares the highest-scoring player after the last eligible final turn and accepts no further scores.
-19. The app remains a manual scorekeeper. It does not validate dice, add a first-player selector, or add a start randomizer.
-20. The hero tagline is exactly `Roll bold. Bank bigger. Farkle.`
-21. The core flow works at narrow phone width and desktop width using pointer and keyboard input.
-22. Text and controls meet WCAG AA contrast, visible-focus, and reduced-motion expectations.
-23. A production build deploys as static files through the GitHub Pages pattern used by `howbigisit` and loads at `farkle.rdyson.dev` without a server dependency.
-24. The hero subtitle is exactly `A scorekeeper for Farkle, a six-dice game for 2–8 players.`
+3. Entering valid positive whole-number points adds one item to the active throw ledger, updates the derived unbanked subtotal, and does not change the player's banked total or advance the turn.
+4. Empty, zero, negative, decimal, and non-numeric throw entries do not change game state and produce a clear inline message.
+5. `Undo last throw` removes only the newest pending ledger item and updates the derived subtotal.
+6. `Bank` is available when the subtotal is positive. It adds the subtotal once to the current player's total, records one completed turn, clears the pending ledger, and advances.
+7. `Farkle` discards every pending ledger item, records a completed zero-point turn, leaves the player's banked total unchanged, and advances.
+8. `Undo last turn` after Bank or Farkle restores the complete state before that action, including totals, current player, pending ledger, and final-round state. Undoing a mistaken Farkle restores its discarded ledger.
+9. Refreshing or reopening the site on the same browser restores the active game exactly, including an in-progress throw ledger and subtotal.
+10. New Game warns before replacing an active game and clears it only after confirmation.
+11. The released header `Table guide` control and its focused modal/dialog do not exist in the interface or application behavior. They are removed, not hidden.
+12. `How to Play` and `Rules` remain separate, keyboard-operable collapsible sections.
+13. `How to Play` explains the six-dice turn loop: the first listed player starts; play follows entered order; each roll must set aside at least one scoring die or combination; the player may bank or reroll the remaining dice; a Farkle loses only that turn's unbanked points; and combinations cannot be built across rolls.
+14. `How to Play` explains manual throw entry, Bank, Farkle, both undo actions, the selected hot-dice and opening-score behavior, the selected winning-threshold trigger, and the strict-higher final-round process.
+15. `Rules` shows the active selected scoring and play variants with plain explanations and refreshes when pre-game rule selections change. When face-based doubling is selected, it explains four / five / six of a kind as 2× / 4× / 8× the corresponding triple score.
+16. Rule selections persist locally and are fixed once play starts unless the operator starts a new game.
+17. When a Bank action first raises a player to or above the selected winning threshold, the interface marks the final round and identifies the score to beat.
+18. Each other player receives exactly one final turn, following the existing turn order; Bank or Farkle completes that turn.
+19. A tied banked score does not take the lead. Only a strictly higher banked score updates the leader and score to beat.
+20. The game declares the highest-scoring player after the last eligible final turn and accepts no further throw entries, Bank actions, or Farkle actions.
+21. The app remains a manual scorekeeper. It does not validate dice or combinations, add a first-player selector, or add a start randomizer.
+22. The hero tagline is exactly `Roll bold. Bank bigger. Farkle.`
+23. The core flow works at narrow phone width and desktop width using pointer and keyboard input.
+24. Text and controls meet WCAG AA contrast, visible-focus, and reduced-motion expectations.
+25. A production build deploys as static files through the GitHub Pages pattern used by `howbigisit` and loads at `farkle.rdyson.dev` without a server dependency.
+26. The hero subtitle is exactly `A scorekeeper for Farkle, a six-dice game for 2–8 players.`
 
-## Confirmed v1 decisions
+## Confirmed product decisions
 
 Confirmed by the operator on 20 August 2026:
 
@@ -98,6 +101,27 @@ Confirmed by the operator on 20 August 2026:
 10. The separate below-setup `How to Play` and `Rules` sections remain keyboard-operable. They retain the expanded six-dice turn loop and active selected-rules scoring reference. The app still accepts manual turn scores and does not validate dice.
 11. The first listed player starts, and play follows entered order. V1 does not include a first-player selector or randomizer.
 12. The hero subtitle is `A scorekeeper for Farkle, a six-dice game for 2–8 players.`
+
+Confirmed by the operator on 21 August 2026:
+
+13. The `Common house rules` preset keeps fixed 1,000 / 2,000 / 3,000 scores for four / five / six of a kind. The existing face-based multiplier alternative scores them at 2× / 4× / 8× the corresponding triple score.
+14. During a turn, players manually enter points for each scoring throw. The app keeps an ordered ledger and derives the unbanked subtotal. It never asks for dice or validates the score.
+15. `Bank` commits the subtotal. `Farkle` loses the complete unbanked subtotal and advances with a zero turn. `Undo last throw` removes the newest pending entry.
+16. `Undo last turn` after a mistaken Farkle restores the discarded throw ledger and the complete pre-Farkle state.
+
+## Authorized implementation plan
+
+This slice is bounded to manual turn accumulation and its direct consequences. It does not reopen visual identity, house-rule inventory, final-round policy, deployment, or any other v1.2 behavior.
+
+1. Replace the single end-of-turn score input with a positive whole-number `Points this throw` input, `Add`, a visible ordered throw ledger, and a derived unbanked subtotal.
+2. Add explicit `Bank` and `Farkle` actions plus clearly labeled `Undo last throw` and `Undo last turn` actions.
+3. Extend browser-local state and undo snapshots to preserve and restore the pending ledger, including refresh and mistaken-Farkle recovery.
+4. Trigger totals and final-round transitions only from Bank. Treat Farkle as the current player's completed zero-point turn.
+5. Clarify the existing multiplier alternative as 2× / 4× / 8× the corresponding triple; keep fixed 1,000 / 2,000 / 3,000 as the Common default and keep all scoring rules informational.
+6. Update the existing below-setup help and Rules summary for the new manual flow. Do not add dice entry, combination selection, automated scoring, or a Table guide.
+7. Require unit tests for ledger arithmetic and both undo levels, plus real-browser checks for Bank, Farkle, refresh recovery, final-round integration, keyboard use, and phone width.
+
+Implementation remains unstarted until the operator separately authorizes orchestration against the frozen hash of this revision.
 
 ## Lean Tightbeam operating plan
 
@@ -121,3 +145,4 @@ This plan intentionally avoids a separate project manager, designer, QA session,
 - [PlayMonster Farkle rules](https://playmonster.com/wp-content/uploads/2018/06/Farkle-Rules.pdf): commercial rules for turn flow, 500-point opening, hot dice, final turns, and combination scores.
 - [Dice Game Depot rules and variants](https://www.dicegamedepot.com/farkle-rules/): common alternative scores and play variants.
 - [Dice Game Depot printable variant summary](https://www.dicegamedepot.com/content/pdf/farkle-scoring-rules-dicegamedepot.pdf): compact comparison of conventional options.
+- [LITE Games Farkle rules](https://info.lite.games/en/support/solutions/articles/60000688670-farkle-rules): face-based doubling for additional matching dice, running turn points, banking, and loss of unbanked points on a Farkle.
