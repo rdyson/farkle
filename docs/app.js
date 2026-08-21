@@ -1,4 +1,4 @@
-import { createGame, defaultRules, parseTurnScore, recordScore, undoScore, validateNames } from "./game.js";
+import { bankTurn, createGame, defaultRules, farkleTurn, migrateGame, parseThrowScore, tryAddThrow, unbankedSubtotal, undoLastThrow, undoLastTurn, validateNames } from "./game.js";
 
 const storageKey = "farkle-scorekeeper-v1";
 const options = {
@@ -8,7 +8,7 @@ const options = {
   openingScore: [[0, "No opening minimum"], [350, "350 before the first bank"], [400, "400 before the first bank"], [500, "500 before the first bank"], [600, "600 before the first bank"], [1000, "1,000 before the first bank"]],
   singleFive: [[true, "Single 1 = 100; single 5 = 50"], [false, "No single 5"]],
   tripleOnes: [[1000, "Three 1s = 1,000"], [300, "Three 1s = 300"]],
-  extendedKinds: [["fixed", "Four / five / six = 1,000 / 2,000 / 3,000"], ["multipliers", "Multiply the triple score"]],
+  extendedKinds: [["fixed", "Four / five / six = 1,000 / 2,000 / 3,000"], ["multipliers", "Four / five / six = 2× / 4× / 8× the corresponding triple score"]],
   straight: [[1500, "Straight = 1,500"], [1200, "1,200"], [2000, "2,000"], [2500, "2,500"], [3000, "3,000"], [0, "No special score"]],
   threePairs: [[1500, "Three pairs = 1,500"], [500, "500"], [600, "600"], [750, "750"], [1000, "1,000"], [0, "No special score"]],
   fourAndPair: [["1500", "Four of a kind + pair = 1,500"], ["four-only", "Score only the four of a kind"]],
@@ -33,10 +33,7 @@ function loadGame() {
   if (raw === null) return null;
   try {
     const saved = JSON.parse(raw);
-    if (saved?.schemaVersion !== 1 || !Array.isArray(saved.players) || saved.players.length < 2) {
-      throw new Error("The saved game has an unknown format. Start a new game to replace it.");
-    }
-    return saved;
+    return migrateGame(saved);
   } catch (error) {
     storageError = error instanceof SyntaxError
       ? "The saved game is unreadable. Start a new game to replace it."
@@ -145,8 +142,19 @@ function renderGame() {
     item.innerHTML = `<span class="place">${index + 1}</span><span class="player-name">${escapeHtml(player.name)}${isLeader ? '<small>Leader</small>' : ""}</span><strong>${player.total.toLocaleString()}</strong>`;
     return item;
   }));
-  elements["score-form"].hidden = game.phase === "finished";
-  elements.undo.hidden = !game.undoState;
+  const finished = game.phase === "finished";
+  const subtotal = unbankedSubtotal(game);
+  elements["throw-controls"].hidden = finished;
+  elements["pending-throws"].replaceChildren(...game.pendingThrows.map((points) => {
+    const item = document.createElement("li");
+    item.textContent = points.toLocaleString();
+    return item;
+  }));
+  elements["empty-ledger"].hidden = game.pendingThrows.length > 0;
+  elements["unbanked-subtotal"].textContent = subtotal.toLocaleString();
+  elements.bank.disabled = subtotal === 0;
+  elements["undo-throw"].disabled = game.pendingThrows.length === 0;
+  elements["undo-turn"].hidden = !game.lastTurnSnapshot;
   elements["how-to-play"].open = !game.collapsed.howToPlay;
   elements["rules-summary"].open = !game.collapsed.rules;
   renderSelectedRules();
@@ -166,20 +174,41 @@ elements["setup-form"].addEventListener("submit", (event) => {
   game = createGame(setupNames, readRules());
   saveGame();
   renderGame();
-  elements["turn-score"].focus();
+  elements["throw-score"].focus();
 });
-elements["score-form"].addEventListener("submit", (event) => {
+elements["throw-form"].addEventListener("submit", (event) => {
   event.preventDefault();
-  const result = parseTurnScore(elements["turn-score"].value);
+  const parsed = parseThrowScore(elements["throw-score"].value);
+  if (parsed.error) {
+    elements["score-error"].textContent = parsed.error;
+    return;
+  }
+  const result = tryAddThrow(game, parsed.points);
   elements["score-error"].textContent = result.error ?? "";
   if (result.error) return;
-  game = recordScore(game, result.score);
-  elements["turn-score"].value = "";
+  game = result.game;
+  elements["throw-score"].value = "";
   saveGame();
   renderGame();
-  if (game.phase !== "finished") elements["turn-score"].focus();
+  elements["throw-score"].focus();
 });
-elements.undo.addEventListener("click", () => { game = undoScore(game); saveGame(); renderGame(); elements["turn-score"].focus(); });
+function completeTurn(action, label) {
+  game = action(game);
+  saveGame();
+  renderGame();
+  const winner = game.players.find((player) => player.id === game.winnerId);
+  if (game.phase === "finished") {
+    elements["turn-status"].textContent = `${label}. ${winner.name} wins.`;
+    elements["turn-heading"].focus();
+  } else {
+    elements["turn-status"].textContent = `${label}. ${game.players[game.currentIndex].name} is next.`;
+    elements["throw-score"].focus();
+  }
+}
+elements.bank.addEventListener("click", () => completeTurn(bankTurn, "Score banked"));
+elements.farkle.addEventListener("click", () => completeTurn(farkleTurn, "Farkle recorded"));
+elements["undo-throw"].addEventListener("click", () => { game = undoLastThrow(game); saveGame(); renderGame(); elements["turn-status"].textContent = "Last throw removed."; elements["throw-score"].focus(); });
+elements["undo-turn"].addEventListener("click", () => { game = undoLastTurn(game); saveGame(); renderGame(); elements["turn-status"].textContent = "Last turn restored."; elements["throw-score"].focus(); });
 elements["new-game"].addEventListener("click", () => elements["new-game-dialog"].showModal());
 elements["confirm-new-game"].addEventListener("click", () => { game = null; storageError = null; saveGame(); setupNames = ["", ""]; renderPlayerFields(); renderGame(); });
 for (const [id, key] of [["how-to-play", "howToPlay"], ["rules-summary", "rules"]]) {

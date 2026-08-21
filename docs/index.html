@@ -53,22 +53,38 @@
       <section id="game-screen" class="screen game-screen" aria-live="polite" hidden>
         <div id="game-banner" class="game-banner">
           <p id="phase-label" class="eyebrow"></p>
-          <h1 id="turn-heading"></h1>
+          <h1 id="turn-heading" tabindex="-1"></h1>
           <p id="score-to-beat" class="score-to-beat"></p>
         </div>
 
         <ol id="scoreboard" class="scoreboard" aria-label="Scoreboard"></ol>
 
-        <form id="score-form" class="score-entry" novalidate>
-          <label for="turn-score">Points this turn</label>
+        <section class="score-entry" aria-labelledby="throw-entry-title">
+          <h2 id="throw-entry-title">Current turn</h2>
+          <div id="throw-controls">
+          <form id="throw-form" novalidate>
+          <label for="throw-score">Points this throw</label>
           <div class="score-controls">
-            <input id="turn-score" name="turn-score" inputmode="numeric" autocomplete="off" placeholder="0" />
-            <button class="primary-button" type="submit">Bank it!</button>
+            <input id="throw-score" name="throw-score" inputmode="numeric" autocomplete="off" aria-describedby="score-error" placeholder="Enter agreed points" />
+            <button class="primary-button" type="submit">Add</button>
           </div>
-          <p class="hint">Farkled? Enter 0. We don’t judge.</p>
           <p id="score-error" class="error" role="alert"></p>
-          <button id="undo" class="secondary-button undo-button" type="button">Undo last score</button>
-        </form>
+          </form>
+          <div class="throw-ledger">
+            <h3>Scoring throws</h3>
+            <p id="empty-ledger" class="hint">No scoring throws added yet.</p>
+            <ol id="pending-throws"></ol>
+            <p class="subtotal">Unbanked subtotal <strong id="unbanked-subtotal">0</strong></p>
+          </div>
+          <div class="turn-actions">
+            <button id="bank" class="primary-button" type="button">Bank</button>
+            <button id="farkle" class="danger-button" type="button">Farkle</button>
+            <button id="undo-throw" class="secondary-button" type="button">Undo last throw</button>
+          </div>
+          </div>
+          <button id="undo-turn" class="secondary-button undo-button" type="button">Undo last turn</button>
+          <p id="turn-status" class="sr-only" aria-live="polite"></p>
+        </section>
       </section>
 
       <aside class="learn">
@@ -76,10 +92,11 @@
           <summary>How to Play</summary>
           <div class="details-body">
             <p>The first listed player starts. Play follows the entered order. Start every turn with six dice. After each roll, set aside at least one scoring die or combination. Then bank the turn’s points or reroll the remaining dice.</p>
-            <p>A Farkle ends the turn and loses only its unbanked points. Combinations must come from one roll; they cannot be built across rolls.</p>
+            <p>After each scoring throw, enter the points agreed at the table and select Add. The scorekeeper keeps an ordered ledger and derives the unbanked subtotal. Bank adds that subtotal to the current player's total. Farkle discards it and ends the turn with no points.</p>
+            <p>Undo last throw removes the newest pending entry. Undo last turn restores the complete state from before the newest Bank or Farkle. Combinations must come from one roll; they cannot be built across rolls.</p>
             <p><strong>Hot dice:</strong> <span id="how-to-hot-dice"></span> <strong>Opening score:</strong> <span id="how-to-opening-score"></span></p>
             <p>The first player to reach the selected winning threshold (<span id="how-to-threshold">10,000 points</span>) starts the final round. Every other player gets one last turn in the existing order. A challenger must finish strictly higher than the current score to beat; a tie leaves the existing leader in front.</p>
-            <p>Enter each banked turn score yourself. The scorekeeper adds it to the player’s total but does not check the dice.</p>
+            <p>Enter each scoring throw yourself. The scorekeeper does not check the physical dice or validate points against the selected scoring rules.</p>
           </div>
         </details>
         <details id="rules-summary">
