@@ -64,10 +64,7 @@ export function tryAddThrow(state, points) {
 }
 
 function isValidVersionTwoState(saved, isSnapshot = false) {
-  if (!saved || saved.schemaVersion !== 2 || !Array.isArray(saved.players) || saved.players.length < 2
-    || !Number.isInteger(saved.currentIndex) || saved.currentIndex < 0 || saved.currentIndex >= saved.players.length
-    || !["playing", "final", "finished"].includes(saved.phase)
-    || saved.players.some((player) => !Number.isSafeInteger(player?.total) || player.total < 0)
+  if (!saved || saved.schemaVersion !== 2 || !hasValidSharedState(saved)
     || !Array.isArray(saved.pendingThrows)
     || saved.pendingThrows.some((points) => !Number.isSafeInteger(points) || points <= 0)) return false;
   const subtotal = saved.pendingThrows.reduce((total, points) => total + points, 0);
@@ -76,12 +73,36 @@ function isValidVersionTwoState(saved, isSnapshot = false) {
   return saved.lastTurnSnapshot === null || isValidVersionTwoState(saved.lastTurnSnapshot, true);
 }
 
-export function migrateGame(saved) {
-  if (!saved || !Array.isArray(saved.players) || saved.players.length < 2) {
-    throw new Error("The saved game has an unknown format. Start a new game to replace it.");
+function hasValidSharedState(saved) {
+  return saved && Array.isArray(saved.players) && saved.players.length >= 2
+    && saved.players.every((player) => typeof player?.id === "string" && typeof player.name === "string"
+      && Number.isSafeInteger(player.total) && player.total >= 0)
+    && Number.isInteger(saved.currentIndex) && saved.currentIndex >= 0 && saved.currentIndex < saved.players.length
+    && ["playing", "final", "finished"].includes(saved.phase)
+    && saved.rules && typeof saved.rules === "object"
+    && Number.isSafeInteger(saved.rules.winningScore) && saved.rules.winningScore > 0
+    && saved.collapsed && typeof saved.collapsed.howToPlay === "boolean" && typeof saved.collapsed.rules === "boolean";
+}
+
+function isValidVersionOneState(saved) {
+  if (saved?.schemaVersion !== 1 || !hasValidSharedState(saved)
+    || "pendingThrows" in saved || "lastTurnSnapshot" in saved
+    || !(saved.undoState === null || (saved.undoState && typeof saved.undoState === "object"))) return false;
+  const leaderExists = saved.players.some((player) => player.id === saved.leaderId);
+  if (saved.phase === "playing") {
+    return saved.leaderId === null && saved.scoreToBeat === null && saved.finalTurnsRemaining === null && saved.winnerId === null;
   }
+  if (!leaderExists || !Number.isSafeInteger(saved.scoreToBeat) || saved.scoreToBeat < 0
+    || !Number.isInteger(saved.finalTurnsRemaining)) return false;
+  if (saved.phase === "final") {
+    return saved.finalTurnsRemaining > 0 && saved.finalTurnsRemaining < saved.players.length && saved.winnerId === null;
+  }
+  return saved.finalTurnsRemaining === 0 && saved.players.some((player) => player.id === saved.winnerId);
+}
+
+export function migrateGame(saved) {
   if (isValidVersionTwoState(saved)) return structuredClone(saved);
-  if (saved.schemaVersion !== 1) {
+  if (!isValidVersionOneState(saved)) {
     throw new Error("The saved game has an unknown format. Start a new game to replace it.");
   }
   const { undoState: _undoState, ...rest } = saved;

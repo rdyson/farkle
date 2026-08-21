@@ -86,6 +86,24 @@ test("migrates schema version 1 without changing established game state", () => 
   assert.equal("undoState" in migrated, false);
 });
 
+test("rejects malformed schema-version-1 saves instead of migrating them", () => {
+  const legacy = { ...createGame(["Ada", "Lin"]), schemaVersion: 1, undoState: null };
+  delete legacy.pendingThrows;
+  delete legacy.lastTurnSnapshot;
+  for (const mutate of [
+    (saved) => { saved.currentIndex = 8; },
+    (saved) => { saved.phase = "unknown"; },
+    (saved) => { saved.players[0].total = -1; },
+    (saved) => { saved.rules = null; },
+    (saved) => { saved.pendingThrows = [100]; },
+    (saved) => { saved.phase = "final"; },
+  ]) {
+    const malformed = structuredClone(legacy);
+    mutate(malformed);
+    assert.throws(() => migrateGame(malformed), /unknown format/);
+  }
+});
+
 test("rejects malformed version-2 ledgers and completed-turn snapshots", () => {
   const unsafeLedger = createGame(["Ada", "Lin"]);
   unsafeLedger.pendingThrows = [Number.MAX_SAFE_INTEGER, 1];

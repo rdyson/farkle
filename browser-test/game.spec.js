@@ -143,7 +143,7 @@ test("removes the table guide and keeps selected guidance below setup", async ({
   await expect(page.locator("#selected-rules")).toContainText("must roll all six");
 });
 
-for (const viewport of [{ name: "phone", width: 360, height: 740 }, { name: "desktop", width: 1280, height: 900 }]) {
+for (const viewport of [{ name: "phone", width: 320, height: 740 }, { name: "desktop", width: 1280, height: 900 }]) {
   test(`core flow fits ${viewport.name} width`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await startGame(page);
@@ -153,9 +153,51 @@ for (const viewport of [{ name: "phone", width: 360, height: 740 }, { name: "des
     }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(0);
+    await expect(page.getByRole("heading", { name: /Ada.*turn/ })).toBeVisible();
+    await expect(page.locator("#pending-throws")).toHaveText(/100.*200.*300.*400/);
+    await expect(page.locator("#unbanked-subtotal")).toHaveText("1,000");
     await expect(page.getByLabel("Points this throw")).toBeInViewport();
     await expect(page.getByRole("button", { name: "Bank", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Farkle", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Undo last throw" })).toBeEnabled();
+  });
+}
+
+test("keyboard turn actions and both undo levels restore the required focus", async ({ page }) => {
+  await startGame(page);
+  const input = page.getByLabel("Points this throw");
+  await input.fill("300");
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Undo last throw" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(input).toBeFocused();
+
+  await input.fill("500");
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Bank", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(input).toBeFocused();
+
+  await page.getByRole("button", { name: "Undo last turn" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(input).toBeFocused();
+
+  await page.getByRole("button", { name: "Farkle", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(input).toBeFocused();
+});
+
+for (const finishingAction of ["Bank", "Farkle"]) {
+  test(`keyboard ${finishingAction} moves focus to the winner heading`, async ({ page }) => {
+    await startGame(page, ["Ada", "Lin"], "5000");
+    await bank(page, 5000);
+    if (finishingAction === "Bank") {
+      await page.getByLabel("Points this throw").fill("5001");
+      await page.keyboard.press("Enter");
+    }
+    await page.getByRole("button", { name: finishingAction, exact: true }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#turn-heading")).toBeFocused();
   });
 }
 
