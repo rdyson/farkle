@@ -15,8 +15,9 @@ async function startGame(page, names = ["Ada", "Lin"], winningScore = "10000") {
 }
 
 async function bank(page, score) {
-  await page.getByLabel("Points this turn").fill(String(score));
-  await page.getByRole("button", { name: "Bank it!" }).click();
+  await page.getByLabel("Points this throw").fill(String(score));
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByRole("button", { name: "Bank", exact: true }).click();
 }
 
 test("starts, validates, scores, restores, and undoes a game", async ({ page }) => {
@@ -29,18 +30,25 @@ test("starts, validates, scores, restores, and undoes a game", async ({ page }) 
   await page.getByRole("button", { name: /Start the game/ }).click();
 
   await expect(page.getByRole("heading", { name: /Ada.*turn/ })).toBeVisible();
-  await page.getByLabel("Points this turn").fill("1.5");
-  await page.getByRole("button", { name: "Bank it!" }).click();
-  await expect(page.getByText("Enter a whole number of zero or more.")).toBeVisible();
-  await bank(page, 600);
+  await page.getByLabel("Points this throw").fill("1.5");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(page.getByText("Enter a positive whole number.")).toBeVisible();
+  await page.getByLabel("Points this throw").fill("300");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByLabel("Points this throw").fill("250");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(page.locator("#pending-throws")).toHaveText(/300.*250/);
+  await expect(page.locator("#unbanked-subtotal")).toHaveText("550");
+  await page.getByRole("button", { name: "Bank", exact: true }).click();
   await expect(page.getByRole("heading", { name: /Lin.*turn/ })).toBeVisible();
-  await expect(page.getByRole("listitem").filter({ hasText: "Ada" }).getByText("600")).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: "Ada" }).getByText("550")).toBeVisible();
 
   await page.reload();
   await expect(page.getByRole("heading", { name: /Lin.*turn/ })).toBeVisible();
-  await page.getByRole("button", { name: "Undo last score" }).click();
+  await page.getByRole("button", { name: "Undo last turn" }).click();
   await expect(page.getByRole("heading", { name: /Ada.*turn/ })).toBeVisible();
   await expect(page.getByRole("listitem").filter({ hasText: "Ada" }).getByText("0")).toBeVisible();
+  await expect(page.locator("#pending-throws")).toHaveText(/300.*250/);
 });
 
 test("runs one final turn per challenger and keeps the leader on a tie", async ({ page }) => {
@@ -56,7 +64,8 @@ test("runs one final turn per challenger and keeps the leader on a tie", async (
 
   await expect(page.getByText("We have a winner")).toBeVisible();
   await expect(page.getByRole("heading", { name: /Bea.*takes the glory/ })).toBeVisible();
-  await expect(page.getByLabel("Points this turn")).toBeHidden();
+  await expect(page.getByLabel("Points this throw")).toBeHidden();
+  await expect(page.getByRole("button", { name: "Undo last turn" })).toBeVisible();
 });
 
 test("persists collapsible state and confirms before clearing a game", async ({ page }) => {
@@ -84,8 +93,7 @@ test("supports the core flow with keyboard input", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { name: /Ada.*turn/ })).toBeVisible();
 
-  await page.getByLabel("Points this turn").fill("0");
-  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Farkle", exact: true }).click();
   await expect(page.getByRole("heading", { name: /Lin.*turn/ })).toBeVisible();
   await page.getByText("Rules", { exact: true }).focus();
   await page.keyboard.press("Enter");
@@ -139,8 +147,38 @@ for (const viewport of [{ name: "phone", width: 360, height: 740 }, { name: "des
   test(`core flow fits ${viewport.name} width`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await startGame(page);
+    for (const points of [100, 200, 300, 400]) {
+      await page.getByLabel("Points this throw").fill(String(points));
+      await page.keyboard.press("Enter");
+    }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(0);
-    await expect(page.getByLabel("Points this turn")).toBeInViewport();
+    await expect(page.getByLabel("Points this throw")).toBeInViewport();
+    await expect(page.getByRole("button", { name: "Bank", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Farkle", exact: true })).toBeVisible();
   });
 }
+
+test("persists pending throws and restores a mistaken Farkle", async ({ page }) => {
+  await startGame(page);
+  await page.getByLabel("Points this throw").fill("300");
+  await page.keyboard.press("Enter");
+  await page.getByLabel("Points this throw").fill("250");
+  await page.keyboard.press("Enter");
+  await page.reload();
+  await expect(page.locator("#pending-throws")).toHaveText(/300.*250/);
+  await expect(page.locator("#unbanked-subtotal")).toHaveText("550");
+  await page.getByRole("button", { name: "Farkle", exact: true }).click();
+  await page.reload();
+  await page.getByRole("button", { name: "Undo last turn" }).click();
+  await expect(page.getByRole("heading", { name: /Ada.*turn/ })).toBeVisible();
+  await expect(page.locator("#pending-throws")).toHaveText(/300.*250/);
+});
+
+test("shows exact informational multiplier wording", async ({ page }) => {
+  await page.goto("/");
+  await page.getByText("Adjust rules", { exact: true }).click();
+  await page.getByLabel("Four, five, or six of a kind").selectOption("multipliers");
+  await page.getByText("Rules", { exact: true }).click();
+  await expect(page.locator("#selected-rules")).toContainText("2× / 4× / 8× the corresponding triple score");
+});
