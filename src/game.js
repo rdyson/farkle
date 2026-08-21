@@ -73,14 +73,32 @@ function isValidVersionTwoState(saved, isSnapshot = false) {
   return saved.lastTurnSnapshot === null || isValidVersionTwoState(saved.lastTurnSnapshot, true);
 }
 
+const validRuleValues = Object.freeze({
+  winningScore: [5000, 10000, 15000, 20000],
+  openingScore: [0, 350, 400, 500, 600, 1000],
+  singleFive: [true, false],
+  tripleOnes: [1000, 300],
+  extendedKinds: ["fixed", "multipliers"],
+  straight: [1500, 1200, 2000, 2500, 3000, 0],
+  threePairs: [1500, 500, 600, 750, 1000, 0],
+  fourAndPair: ["1500", "four-only"],
+  twoTriplets: ["2500", "separate"],
+  hotDice: ["choice", "must-roll"],
+  consecutiveFarkles: [0, 500, 1000],
+});
+
+function hasValidRules(rules) {
+  return rules && typeof rules === "object"
+    && Object.entries(validRuleValues).every(([key, values]) => values.includes(rules[key]));
+}
+
 function hasValidSharedState(saved) {
   return saved && Array.isArray(saved.players) && saved.players.length >= 2
     && saved.players.every((player) => typeof player?.id === "string" && typeof player.name === "string"
       && Number.isSafeInteger(player.total) && player.total >= 0)
     && Number.isInteger(saved.currentIndex) && saved.currentIndex >= 0 && saved.currentIndex < saved.players.length
     && ["playing", "final", "finished"].includes(saved.phase)
-    && saved.rules && typeof saved.rules === "object"
-    && Number.isSafeInteger(saved.rules.winningScore) && saved.rules.winningScore > 0
+    && hasValidRules(saved.rules)
     && saved.collapsed && typeof saved.collapsed.howToPlay === "boolean" && typeof saved.collapsed.rules === "boolean";
 }
 

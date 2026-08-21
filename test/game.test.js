@@ -95,6 +95,9 @@ test("rejects malformed schema-version-1 saves instead of migrating them", () =>
     (saved) => { saved.phase = "unknown"; },
     (saved) => { saved.players[0].total = -1; },
     (saved) => { saved.rules = null; },
+    (saved) => { saved.rules = { winningScore: 10000 }; },
+    (saved) => { saved.rules.openingScore = undefined; },
+    (saved) => { saved.rules.hotDice = "automatic"; },
     (saved) => { saved.pendingThrows = [100]; },
     (saved) => { saved.phase = "final"; },
   ]) {
